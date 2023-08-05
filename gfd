@@ -1,42 +1,50 @@
+import discord
 import random
-game = ["rock","knife","paper"]
-random.choice(game)
-bot_count = 0 
-player_count = 0
 
-if "rock "> "knife":
-   player_count += 1
-else:
-    bot_count += 1
-if  "rock" >  "paper":
-    player_count += 1
-else:
-    bot_count += 1
-    
-if "knife" > "paper":
-    player_count += 1
-else:
-    bot_count += 1
+TOKEN = "YOUR_DISCORD_BOT_TOKEN"
+PREFIX = "!"  # Префикс для команд
 
+intents = discord.Intents.default()
+intents.message_content = True
 
+client = discord.Client(intents=intents)
+
+@client.event
+async def on_ready():
+    print(f"We have logged in as {client.user}")
+
+@client.event
 async def on_message(message):
-    if message.content.startswith == message.channel.send:
-        print("Ничья")
-    if message.content.startswith == "rock" and message.channel.send == game:
-        print("игрок получил очко")
-        player_count += 1
-    else:
-        print("бот получил очко")
-        bot_count += 1
-    if message.content.startswith == "knife" and message.channel.send == game:
-        print("игрок получил очко")
-        player_count += 1
-    else:
-        print("бот получил очко")
-        bot_count += 1
-    if message.content.startswith == "paper" and message.channel.send == game:
-        print("игрок попедил")
-        player_count += 1
-    else:
-        print("бот попедил")
-        bot_count += 1
+    if message.author == client.user:
+        return
+
+    if message.content.startswith(PREFIX + "rps"):
+        # Список возможных вариантов для игры
+        choices = ["rock", "paper", "scissors"]
+        
+        # Генерируем выбор бота
+        bot_choice = random.choice(choices)
+        
+        # Получаем выбор пользователя из сообщения
+        user_choice = message.content.split()[-1].lower()
+        
+        # Проверяем допустимость выбора пользователя
+        if user_choice not in choices:
+            await message.channel.send("Неверный выбор. Попробуйте снова.")
+            return
+        
+        # Определяем результата игры
+        if bot_choice == user_choice:
+            result = "Ничья!"
+        elif (
+            (bot_choice == "rock" and user_choice == "scissors") or
+            (bot_choice == "paper" and user_choice == "rock") or
+            (bot_choice == "scissors" and user_choice == "paper")
+        ):
+            result = "Вы проиграли!"
+        else:
+            result = "Вы победили!"
+        
+        await message.channel.send(f"Бот выбрал: {bot_choice}\nВы выбрали: {user_choice}\nРезультат: {result}")
+
+client.run('token')
